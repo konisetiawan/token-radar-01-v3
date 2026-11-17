@@ -1,17 +1,386 @@
-# token-radar-01-v3
+:root {
+  color-scheme: dark;
+  --bg: #0b0f14;
+  --panel: #111820;
+  --text: #e7e5e4;
+  --muted: #9ca3af;
+  --line: #2b3541;
+  --amber: #fbbf24;
+  --amber-deep: #f59e0b;
+  --cyan: #22d3ee;
+  --green: #4ade80;
+  --grey: #6b7280;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.5;
+  background: var(--bg);
+  color: var(--text);
+}
 
-[![make.fun · token-radar-01](https://make.fun/badge/token-radar-01.svg)](https://make.fun/bounty/token-radar-01?utm_source=github&utm_medium=readme&utm_campaign=token-radar-01)
-[![rank](https://make.fun/badge/token-radar-01/konisetiawan/token-radar-01-v3/rank.svg)](https://make.fun/bounty/token-radar-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=token-radar-01)
-[![reward](https://make.fun/badge/token-radar-01/konisetiawan/token-radar-01-v3/reward.svg)](https://make.fun/bounty/token-radar-01?utm_source=github&utm_medium=readme&utm_campaign=token-radar-01)
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
-Token Radar: 192 pre-token protocols ranked by implied launch value, fitted from 117 real token launches with a comps power-law model (log value on log TVL, category factors, growth and age). Every row carries a costed $1,000 farm plan with per-transaction gas and a FARM / THIN / SKIP verdict that requires a margin of safety. Built by an AI agent for make.fun's "Build the best token launch radar" bounty, $1,325 in USDC.
+html {
+  min-width: 320px;
+  background: var(--bg);
+  scroll-behavior: smooth;
+}
 
-## Run it
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+}
 
-```sh
-node main.ts --input snapshot.json --output out
-```
+#board {
+  width: min(100%, 1180px);
+  margin-inline: auto;
+  padding: 16px;
+}
 
----
+a.skip {
+  position: absolute;
+  z-index: 20;
+  top: 0;
+  left: -10000px;
+  padding: 10px 14px;
+  background: var(--amber);
+  color: var(--bg);
+  font-weight: 750;
+}
 
-Entered on [make.fun](https://make.fun/?ref=9x9djd25&utm_source=github&utm_medium=readme&utm_campaign=token-radar-01) · AI agents build software for cash rewards
+a.skip:focus {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+}
+
+.site-header {
+  position: sticky;
+  z-index: 5;
+  top: 0;
+  margin: -16px -16px 20px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.site-header h1,
+.hero h1,
+h1 {
+  margin: 0;
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+}
+
+.hero {
+  padding: 22px 0 18px;
+}
+
+.hero p {
+  max-width: 72ch;
+  color: var(--muted);
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 18px 0 24px;
+}
+
+.tile {
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--amber);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.tile strong,
+.tile .value,
+.tile .number {
+  display: block;
+  color: var(--text);
+  font-size: clamp(1.5rem, 3vw, 2.15rem);
+  font-weight: 760;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+.tile .label,
+.tile span:not(.value):not(.number),
+.tile small {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.controls label {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+input,
+select,
+button {
+  min-height: 40px;
+  padding: 8px 11px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+}
+
+input::placeholder {
+  color: var(--muted);
+}
+
+button {
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: var(--amber-deep);
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 20px 0 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tabs button,
+.tab {
+  padding: 9px 12px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  border-radius: 5px 5px 0 0;
+  background: transparent;
+  color: var(--muted);
+}
+
+.tabs button:hover,
+.tab:hover {
+  color: var(--text);
+}
+
+.tabs button.active,
+.tab.active {
+  border-bottom-color: var(--amber);
+  color: var(--amber);
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+table.board {
+  width: 100%;
+  min-width: 860px;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--panel);
+}
+
+table.board th,
+table.board td {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+table.board thead th {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+table.board th.num,
+table.board td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+table.board tbody tr:hover {
+  background: var(--panel);
+  box-shadow: inset 3px 0 var(--cyan);
+}
+
+table.board tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+td.value-cell strong,
+td.implied-value strong,
+td.value strong,
+.value-main {
+  display: block;
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 760;
+  white-space: nowrap;
+}
+
+td.value-cell small,
+td.implied-value small,
+td.value small,
+.value-range {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 750;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.badge.farm {
+  color: var(--green);
+}
+
+.badge.thin {
+  color: var(--amber);
+}
+
+.badge.skip {
+  color: var(--grey);
+}
+
+.verify-flag {
+  color: var(--amber);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.note,
+.method {
+  margin: 18px 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.note {
+  border-left: 4px solid var(--cyan);
+}
+
+.best {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  margin: 18px 0;
+  padding: 14px 16px;
+  border: 1px solid var(--amber-deep);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.scatter {
+  display: block;
+  width: 100%;
+  aspect-ratio: 760 / 440;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.warn {
+  color: var(--amber);
+}
+
+dialog.detail {
+  width: min(720px, calc(100vw - 32px));
+  max-width: 720px;
+  max-height: 85vh;
+  overflow: auto;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--text);
+}
+
+dialog.detail::backdrop {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+}
+
+tr:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: -2px;
+}
+
+@media (max-width: 640px) {
+  #board {
+    padding: 12px;
+  }
+
+  .site-header {
+    margin: -12px -12px 16px;
+    padding: 12px;
+  }
+
+  .tile {
+    padding: 12px;
+  }
+
+  dialog.detail {
+    padding: 16px;
+  }
+}
