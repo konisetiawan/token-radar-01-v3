@@ -1,386 +1,636 @@
-:root {
-  color-scheme: dark;
-  --bg: #0b0f14;
-  --panel: #111820;
-  --text: #e7e5e4;
-  --muted: #9ca3af;
-  --line: #2b3541;
-  --amber: #fbbf24;
-  --amber-deep: #f59e0b;
-  --cyan: #22d3ee;
-  --green: #4ade80;
-  --grey: #6b7280;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  line-height: 1.5;
-  background: var(--bg);
-  color: var(--text);
-}
+(function () {
+  'use strict';
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+  const DATA = window.RADAR;
 
-html {
-  min-width: 320px;
-  background: var(--bg);
-  scroll-behavior: smooth;
-}
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  background: var(--bg);
-  color: var(--text);
-}
-
-#board {
-  width: min(100%, 1180px);
-  margin-inline: auto;
-  padding: 16px;
-}
-
-a.skip {
-  position: absolute;
-  z-index: 20;
-  top: 0;
-  left: -10000px;
-  padding: 10px 14px;
-  background: var(--amber);
-  color: var(--bg);
-  font-weight: 750;
-}
-
-a.skip:focus {
-  position: fixed;
-  top: 12px;
-  left: 12px;
-}
-
-.site-header {
-  position: sticky;
-  z-index: 5;
-  top: 0;
-  margin: -16px -16px 20px;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--line);
-  background: var(--bg);
-}
-
-.site-header h1,
-.hero h1,
-h1 {
-  margin: 0;
-  font-size: clamp(1.6rem, 4vw, 2.6rem);
-  line-height: 1.08;
-  letter-spacing: -0.035em;
-}
-
-.hero {
-  padding: 22px 0 18px;
-}
-
-.hero p {
-  max-width: 72ch;
-  color: var(--muted);
-}
-
-.tiles {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
-  margin: 18px 0 24px;
-}
-
-.tile {
-  min-width: 0;
-  padding: 14px 16px;
-  border: 1px solid var(--line);
-  border-left: 4px solid var(--amber);
-  border-radius: 8px;
-  background: var(--panel);
-}
-
-.tile strong,
-.tile .value,
-.tile .number {
-  display: block;
-  color: var(--text);
-  font-size: clamp(1.5rem, 3vw, 2.15rem);
-  font-weight: 760;
-  line-height: 1.15;
-  font-variant-numeric: tabular-nums;
-}
-
-.tile .label,
-.tile span:not(.value):not(.number),
-.tile small {
-  display: block;
-  margin-top: 5px;
-  color: var(--muted);
-  font-size: 0.88rem;
-}
-
-.controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: end;
-  gap: 12px;
-  margin: 18px 0;
-}
-
-.controls label {
-  display: grid;
-  gap: 5px;
-  color: var(--muted);
-  font-size: 0.88rem;
-}
-
-input,
-select,
-button {
-  min-height: 40px;
-  padding: 8px 11px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: var(--panel);
-  color: var(--text);
-  font: inherit;
-}
-
-input::placeholder {
-  color: var(--muted);
-}
-
-button {
-  cursor: pointer;
-}
-
-button:hover {
-  border-color: var(--amber-deep);
-}
-
-.tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 20px 0 12px;
-  border-bottom: 1px solid var(--line);
-}
-
-.tabs button,
-.tab {
-  padding: 9px 12px;
-  border: 0;
-  border-bottom: 3px solid transparent;
-  border-radius: 5px 5px 0 0;
-  background: transparent;
-  color: var(--muted);
-}
-
-.tabs button:hover,
-.tab:hover {
-  color: var(--text);
-}
-
-.tabs button.active,
-.tab.active {
-  border-bottom-color: var(--amber);
-  color: var(--amber);
-}
-
-.table-wrap {
-  width: 100%;
-  overflow-x: auto;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--panel);
-}
-
-table.board {
-  width: 100%;
-  min-width: 860px;
-  border-collapse: separate;
-  border-spacing: 0;
-  background: var(--panel);
-}
-
-table.board th,
-table.board td {
-  padding: 11px 12px;
-  border-bottom: 1px solid var(--line);
-  text-align: left;
-  vertical-align: top;
-  overflow-wrap: anywhere;
-}
-
-table.board thead th {
-  position: sticky;
-  z-index: 2;
-  top: 0;
-  background: var(--panel);
-  color: var(--muted);
-  font-size: 0.82rem;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-table.board th.num,
-table.board td.num {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-table.board tbody tr:hover {
-  background: var(--panel);
-  box-shadow: inset 3px 0 var(--cyan);
-}
-
-table.board tbody tr:last-child td {
-  border-bottom: 0;
-}
-
-td.value-cell strong,
-td.implied-value strong,
-td.value strong,
-.value-main {
-  display: block;
-  color: var(--text);
-  font-size: 1rem;
-  font-weight: 760;
-  white-space: nowrap;
-}
-
-td.value-cell small,
-td.implied-value small,
-td.value small,
-.value-range {
-  display: block;
-  margin-top: 2px;
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 400;
-  white-space: nowrap;
-}
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 8px;
-  border: 1px solid currentColor;
-  border-radius: 999px;
-  font-size: 0.76rem;
-  font-weight: 750;
-  line-height: 1.3;
-  white-space: nowrap;
-}
-
-.badge.farm {
-  color: var(--green);
-}
-
-.badge.thin {
-  color: var(--amber);
-}
-
-.badge.skip {
-  color: var(--grey);
-}
-
-.verify-flag {
-  color: var(--amber);
-  font-size: 0.75rem;
-  font-weight: 800;
-}
-
-.note,
-.method {
-  margin: 18px 0;
-  padding: 16px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--panel);
-}
-
-.note {
-  border-left: 4px solid var(--cyan);
-}
-
-.best {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px 16px;
-  margin: 18px 0;
-  padding: 14px 16px;
-  border: 1px solid var(--amber-deep);
-  border-radius: 8px;
-  background: var(--panel);
-}
-
-.mono {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-
-.scatter {
-  display: block;
-  width: 100%;
-  aspect-ratio: 760 / 440;
-}
-
-.muted {
-  color: var(--muted);
-}
-
-.warn {
-  color: var(--amber);
-}
-
-dialog.detail {
-  width: min(720px, calc(100vw - 32px));
-  max-width: 720px;
-  max-height: 85vh;
-  overflow: auto;
-  padding: 22px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--panel);
-  color: var(--text);
-}
-
-dialog.detail::backdrop {
-  background: rgba(0, 0, 0, 0.7);
-}
-
-:focus-visible {
-  outline: 2px solid var(--cyan);
-  outline-offset: 3px;
-}
-
-tr:focus-visible {
-  outline: 2px solid var(--cyan);
-  outline-offset: -2px;
-}
-
-@media (max-width: 640px) {
-  #board {
-    padding: 12px;
+  function fmtUsd(n) {
+    if (n === null || n === undefined || !Number.isFinite(n)) return '—';
+    if (n < 0) return '-$' + Math.abs(n).toFixed(2);
+    if (n >= 1e9) return '$' + (n / 1e9).toFixed(1) + 'B';
+    if (n >= 1e6) return '$' + (n / 1e6).toFixed(1) + 'M';
+    if (n >= 1e3) return '$' + (n / 1e3).toFixed(1) + 'K';
+    return '$' + n.toFixed(2);
   }
 
-  .site-header {
-    margin: -12px -12px 16px;
-    padding: 12px;
+  function fmtUsd2(n) {
+    if (n === null || n === undefined || !Number.isFinite(n)) return '—';
+    return (n < 0 ? '-$' : '$') + Math.abs(n).toFixed(2);
   }
 
-  .tile {
-    padding: 12px;
+  function fmtPct(n) {
+    if (n === null || n === undefined || !Number.isFinite(n)) return '—';
+    return (n < 0 ? '-' : '+') + Math.abs(n).toFixed(1) + '%';
   }
 
-  dialog.detail {
-    padding: 16px;
+  function fmtAge(days) {
+    if (days === null || days === undefined || !Number.isFinite(days)) return '—';
+    return days < 548 ? days + 'd' : (days / 365.25).toFixed(1) + 'y';
   }
-}
+
+  function esc(s) {
+    return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, function (character) {
+      return {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      }[character];
+    });
+  }
+
+  function median(values) {
+    if (!values.length) return 0;
+    const sorted = values.slice().sort(function (a, b) { return a - b; });
+    const middle = Math.floor(sorted.length / 2);
+    return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+  }
+
+  function valueRange(values) {
+    if (!values.length) return [null, null];
+    const sorted = values.slice().sort(function (a, b) { return a - b; });
+    return [sorted[0], sorted[sorted.length - 1]];
+  }
+
+  function make(tag, className, text) {
+    const element = document.createElement(tag);
+    if (className) element.className = className;
+    if (text !== undefined && text !== null) element.textContent = String(text);
+    return element;
+  }
+
+  function header() {
+    const element = make('header', 'site-header');
+    const brand = make('div', 'brand');
+    brand.appendChild(make('div', 'brand-name', 'Token Radar'));
+    brand.appendChild(make('p', 'muted', 'DefiLlama snapshot ' + DATA.as_of + ' · ' + DATA.board_size + ' rows · watchlist floor ' + fmtUsd(DATA.floor_usd)));
+    element.appendChild(brand);
+    return element;
+  }
+
+  function hero() {
+    const section = make('section', 'hero');
+    section.appendChild(make('h1', '', DATA.board_size + ' pre-token protocols ranked by what a launch would be worth — fitted from ' + DATA.model.comps_count + ' real token launches.'));
+    section.appendChild(make('p', '', 'Slice assumes 10% of implied value is distributed pro-rata to TVL.'));
+    const tiles = make('div', 'tiles');
+    const tileData = [
+      [DATA.board_size, 'rows'],
+      [DATA.watchlist_size + '/' + DATA.watchlist_size, 'watchlist'],
+      [DATA.farm_counts.farm, 'FARM'],
+      ['LOO ×' + DATA.backtest.loo_miss.toFixed(2), 'miss factor'],
+    ];
+    for (const item of tileData) {
+      const tile = make('div', 'tile');
+      tile.appendChild(make('strong', '', item[0]));
+      tile.appendChild(make('span', 'label', item[1]));
+      tiles.appendChild(tile);
+    }
+    section.appendChild(tiles);
+    return section;
+  }
+
+  function bestFarms() {
+    const section = make('section', 'best');
+    const content = make('div', 'best-content');
+    content.appendChild(make('h2', '', 'Best farms by net $/hr (usually mid-board: small TVL → bigger $1K slice)'));
+    const list = make('ol', 'best-list');
+    const rows = DATA.rows.slice().sort(function (a, b) {
+      return b.net_per_hour_usd - a.net_per_hour_usd || a.rank - b.rank;
+    }).slice(0, 5);
+    for (const row of rows) {
+      const item = make('li', 'best-item');
+      const button = make('button', 'best-farm');
+      button.type = 'button';
+      button.dataset.detailSlug = row.slug;
+      const capitalThousands = row.capital_usd / 1000;
+      button.textContent = '#' + row.rank + ' ' + row.name + ' — ' + fmtUsd2(row.net_per_hour_usd) + '/hr, $' + capitalThousands + 'K slice ' + fmtUsd2(row.slice_usd) + ', gas ' + fmtUsd2(row.gas_usd);
+      item.appendChild(button);
+      list.appendChild(item);
+    }
+    content.appendChild(list);
+    section.appendChild(content);
+    return section;
+  }
+
+  function researchNote() {
+    const section = make('section', 'note');
+    section.appendChild(make('h2', '', 'What the board says'));
+    const bullets = make('ul', 'research-points');
+    const topThree = DATA.rows.slice().sort(function (a, b) {
+      return b.implied_value_usd - a.implied_value_usd || a.rank - b.rank;
+    }).slice(0, 3);
+    const sliceRange = valueRange(topThree.map(function (row) { return row.slice_usd; }));
+    const costRange = valueRange(topThree.map(function (row) { return row.gas_usd + row.fees_usd + row.forgone_usd; }));
+    const points = [
+      'The top 3 launches by implied value pay a $1K slice of ' + fmtUsd2(sliceRange[0]) + '–' + fmtUsd2(sliceRange[1]) + ' against costs of ' + fmtUsd2(costRange[0]) + '–' + fmtUsd2(costRange[1]) + ' — the biggest launches are the worst farms per dollar.',
+      DATA.farm_counts.farm + ' of ' + DATA.board_size + ' clear $2/hr after costs — the v3 FARM threshold.',
+      'Every value is a band, not a point: the P10–P90 band is value ÷/× ' + median(DATA.rows.map(function (row) { return row.implied_high_usd / row.implied_value_usd; })).toFixed(1) + ' — read the band before the rank.',
+      'Nothing here predicts a token: it prices what a launch would be worth IF the record stays as it is, from TVL, 7-day growth and age with no token.',
+    ];
+    for (const point of points) bullets.appendChild(make('li', '', point));
+    section.appendChild(bullets);
+    return section;
+  }
+
+  const defaultState = {
+    q: '',
+    category: '',
+    chain: '',
+    tvl: '',
+    verdict: '',
+    tab: 'board',
+    sort: 'rank',
+    dir: 'asc',
+    selected: '',
+  };
+
+  function readState() {
+    const params = new URLSearchParams(window.location.hash.slice(1));
+    const tab = params.get('tab') || defaultState.tab;
+    return {
+      q: params.get('q') || '',
+      category: params.get('category') || '',
+      chain: params.get('chain') || '',
+      tvl: params.get('tvl') || '',
+      verdict: params.get('verdict') || '',
+      tab: ['board', 'live', 'aside', 'method'].includes(tab) ? tab : 'board',
+      sort: params.get('sort') || 'rank',
+      dir: params.get('dir') === 'desc' ? 'desc' : 'asc',
+      selected: params.get('selected') || '',
+    };
+  }
+
+  let state = readState();
+
+  function writeState() {
+    const params = new URLSearchParams();
+    for (const key of Object.keys(defaultState)) params.set(key, state[key] || '');
+    window.history.replaceState(null, '', '#' + params.toString());
+  }
+
+  function changeState(key, value) {
+    state[key] = value;
+    writeState();
+    render();
+  }
+
+  function filteredRows() {
+    const query = state.q.trim().toLowerCase();
+    return DATA.rows.filter(function (row) {
+      if (query && !row.name.toLowerCase().includes(query) && !row.slug.toLowerCase().includes(query)) return false;
+      if (state.category && row.category !== state.category) return false;
+      if (state.chain && (row.chains[0] || '') !== state.chain) return false;
+      if (state.verdict && row.verdict !== state.verdict) return false;
+      if (state.tvl === 'gte1b' && row.tvl_usd < 1e9) return false;
+      if (state.tvl === '100m-1b' && (row.tvl_usd < 1e8 || row.tvl_usd >= 1e9)) return false;
+      if (state.tvl === '50m-100m' && (row.tvl_usd < 5e7 || row.tvl_usd >= 1e8)) return false;
+      if (state.tvl === 'lt50m' && row.tvl_usd >= 5e7) return false;
+      return true;
+    }).sort(function (a, b) {
+      const keyMap = {
+        rank: 'rank',
+        name: 'name',
+        category: 'category',
+        tvl: 'tvl_usd',
+        change: 'change_7d',
+        age: 'age_days',
+        implied: 'implied_value_usd',
+        slice: 'slice_usd',
+        net: 'net_per_hour_usd',
+        verdict: 'verdict',
+      };
+      const sortKey = keyMap[state.sort] || 'rank';
+      const left = a[sortKey];
+      const right = b[sortKey];
+      let order;
+      if (left === null || left === undefined) order = right === null || right === undefined ? 0 : -1;
+      else if (right === null || right === undefined) order = 1;
+      else if (typeof left === 'number' && typeof right === 'number') order = left - right;
+      else order = String(left).localeCompare(String(right));
+      if (order === 0) order = a.rank - b.rank;
+      return state.dir === 'desc' ? -order : order;
+    });
+  }
+
+  function addSelect(parent, labelText, options, selected, key) {
+    const label = make('label', '', labelText);
+    const select = make('select', '');
+    for (const optionData of options) {
+      const option = make('option', '', optionData[1]);
+      option.value = optionData[0];
+      option.selected = optionData[0] === selected;
+      select.appendChild(option);
+    }
+    select.addEventListener('change', function () { changeState(key, select.value); });
+    label.appendChild(select);
+    parent.appendChild(label);
+  }
+
+  function controls() {
+    const section = make('section', 'control-area');
+    const form = make('div', 'controls');
+    const searchLabel = make('label', '', 'Search');
+    const search = make('input', '');
+    search.type = 'search';
+    search.id = 'filter-search';
+    search.placeholder = 'Search protocol…';
+    search.value = state.q;
+    search.addEventListener('input', function () {
+      state.q = search.value;
+      writeState();
+      const cursor = search.selectionStart;
+      render();
+      const replacement = document.getElementById('filter-search');
+      replacement.focus();
+      replacement.setSelectionRange(cursor, cursor);
+    });
+    searchLabel.appendChild(search);
+    form.appendChild(searchLabel);
+
+    const categories = [...new Set(DATA.rows.map(function (row) { return row.category; }).filter(Boolean))].sort();
+    const chains = [...new Set(DATA.rows.map(function (row) { return row.chains[0]; }).filter(Boolean))].sort();
+    addSelect(form, 'Category', [['', 'All'], ...categories.map(function (value) { return [value, value]; })], state.category, 'category');
+    addSelect(form, 'Chain', [['', 'All'], ...chains.map(function (value) { return [value, value]; })], state.chain, 'chain');
+    addSelect(form, 'TVL', [
+      ['', 'All'],
+      ['gte1b', '≥$1B'],
+      ['100m-1b', '$100M–$1B'],
+      ['50m-100m', '$50M–$100M'],
+      ['lt50m', '<$50M'],
+    ], state.tvl, 'tvl');
+    addSelect(form, 'Verdict', [['', 'All'], ['FARM', 'FARM'], ['THIN', 'THIN'], ['SKIP', 'SKIP']], state.verdict, 'verdict');
+    section.appendChild(form);
+
+    const tabs = make('nav', 'tabs');
+    const tabData = [
+      ['board', 'No token yet'],
+      ['live', 'Token trades'],
+      ['aside', 'Set aside'],
+      ['method', 'Method and backtest'],
+    ];
+    for (const entry of tabData) {
+      const button = make('button', 'tab' + (state.tab === entry[0] ? ' active' : ''), entry[1]);
+      button.type = 'button';
+      button.addEventListener('click', function () { changeState('tab', entry[0]); });
+      tabs.appendChild(button);
+    }
+    section.appendChild(tabs);
+    section.appendChild(make('p', 'muted result-count', filteredRows().length + ' rows shown'));
+    return section;
+  }
+
+  function boardTable(rows) {
+    const wrapper = make('div', 'table-wrap');
+    const table = make('table', 'board');
+    const head = make('thead', '');
+    const headerRow = make('tr', '');
+    const columns = [
+      ['rank', 'Rank', true],
+      ['name', 'Protocol', false],
+      ['category', 'Category', false],
+      ['tvl', 'TVL', true],
+      ['change', '7d', true],
+      ['age', 'Age', true],
+      ['implied', 'Implied value', true],
+      ['slice', '$1K slice', true],
+      ['net', 'Net $/hr', true],
+      ['verdict', 'Verdict', false],
+    ];
+    for (const column of columns) {
+      const th = make('th', column[2] ? 'num' : '');
+      const button = make('button', 'sort-button', column[1]);
+      button.type = 'button';
+      if (state.sort === column[0]) th.setAttribute('aria-sort', state.dir === 'asc' ? 'ascending' : 'descending');
+      button.addEventListener('click', function () {
+        if (state.sort === column[0]) state.dir = state.dir === 'asc' ? 'desc' : 'asc';
+        else {
+          state.sort = column[0];
+          state.dir = 'asc';
+        }
+        writeState();
+        render();
+      });
+      th.appendChild(button);
+      headerRow.appendChild(th);
+    }
+    head.appendChild(headerRow);
+    table.appendChild(head);
+
+    const body = make('tbody', '');
+    for (const row of rows) {
+      const tr = make('tr', 'board-row');
+      tr.tabIndex = 0;
+      tr.dataset.slug = row.slug;
+      tr.addEventListener('click', function () { openDetail(row.slug); });
+      tr.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') openDetail(row.slug);
+      });
+
+      tr.appendChild(make('td', 'num', row.rank));
+      const nameCell = make('td', 'protocol-cell');
+      const nameLine = make('div', 'protocol-name');
+      nameLine.appendChild(make('strong', '', row.name));
+      if (row.flag === 'verify') nameLine.appendChild(make('span', 'verify-flag', ' verify'));
+      nameCell.appendChild(nameLine);
+      const chainText = row.chains.length > 1 ? row.chains[0] + ' +' + (row.chains.length - 1) + ' more' : row.chains[0] || '—';
+      nameCell.appendChild(make('small', 'muted', chainText));
+      tr.appendChild(nameCell);
+      tr.appendChild(make('td', '', row.category || '—'));
+      tr.appendChild(make('td', 'num', fmtUsd(row.tvl_usd)));
+      tr.appendChild(make('td', 'num', fmtPct(row.change_7d)));
+      tr.appendChild(make('td', 'num', fmtAge(row.age_days)));
+      const valueCell = make('td', 'num implied-value');
+      valueCell.appendChild(make('strong', '', fmtUsd(row.implied_value_usd)));
+      valueCell.appendChild(make('small', 'muted', fmtUsd(row.implied_low_usd) + '–' + fmtUsd(row.implied_high_usd)));
+      tr.appendChild(valueCell);
+      tr.appendChild(make('td', 'num', fmtUsd2(row.slice_usd)));
+      tr.appendChild(make('td', 'num', fmtUsd2(row.net_per_hour_usd)));
+      tr.appendChild(make('td', '', makeBadge(row.verdict)));
+      body.appendChild(tr);
+    }
+    table.appendChild(body);
+    wrapper.appendChild(table);
+    return wrapper;
+  }
+
+  function makeBadge(verdict) {
+    return make('span', 'badge ' + String(verdict).toLowerCase(), verdict);
+  }
+
+  function liveTable() {
+    const wrapper = make('div', 'table-wrap');
+    const table = make('table', 'board live-board');
+    table.appendChild(make('caption', 'muted', 'Already trading: market cap is a fact, not a model. These ' + DATA.live.length + ' are set aside from the pre-token ranking.'));
+    const head = make('thead', '');
+    const headerRow = make('tr', '');
+    for (const label of ['Protocol', 'Category', 'TVL', 'Market cap', 'Multiple', '7d']) {
+      headerRow.appendChild(make('th', ['TVL', 'Market cap', 'Multiple', '7d'].includes(label) ? 'num' : '', label));
+    }
+    head.appendChild(headerRow);
+    table.appendChild(head);
+    const body = make('tbody', '');
+    for (const row of DATA.live) {
+      const tr = make('tr', '');
+      tr.appendChild(make('td', '', row.name));
+      tr.appendChild(make('td', '', row.category || '—'));
+      tr.appendChild(make('td', 'num', fmtUsd(row.tvl_usd)));
+      tr.appendChild(make('td', 'num', fmtUsd(row.mcap_usd)));
+      const multiple = row.mcap_usd === null || !row.tvl_usd ? '—' : '×' + (row.mcap_usd / row.tvl_usd).toFixed(2);
+      tr.appendChild(make('td', 'num', multiple));
+      tr.appendChild(make('td', 'num', fmtPct(row.change_7d)));
+      body.appendChild(tr);
+    }
+    table.appendChild(body);
+    wrapper.appendChild(table);
+    return wrapper;
+  }
+
+  function asidePanel() {
+    const section = make('section', 'method aside-panel');
+    section.appendChild(make('h2', '', 'Set aside'));
+    const list = make('ul', '');
+    const verifyCount = DATA.rows.filter(function (row) { return row.flag === 'verify'; }).length;
+    const bullets = [
+      DATA.live.length + ' protocols whose token already trades (live rows)',
+      verifyCount + ' watchlist rows carry the verify flag',
+      'Early rows exclude staked, wrapped, bridged and stable-pegged protocols, versioned names and exchanges, by the eligibility rule on the Method tab.',
+      'Protocols below the ' + fmtUsd(DATA.floor_usd) + ' snapshot floor are not in the snapshot at all.',
+    ];
+    for (const bullet of bullets) list.appendChild(make('li', '', bullet));
+    section.appendChild(list);
+    section.appendChild(make('p', 'muted', 'Nothing on this page is a price prediction.'));
+    return section;
+  }
+
+  function methodPanel() {
+    const section = make('section', 'method method-panel');
+    section.appendChild(make('h2', '', 'Method and validation'));
+    section.appendChild(make('p', 'muted', 'Board selection: the ' + DATA.watchlist_size + ' watchlist protocols, plus the ' + DATA.early_size + ' highest-implied-value rankable pre-token protocols below the ' + fmtUsd(DATA.floor_usd) + ' floor. Rankable means DefiLlama records no token, and excludes exchanges, versioned names, stable-pegged protocols, staked/wrapped/bridged products and liquid-staking families; watchlist rows are never excluded, and ones tripping those patterns carry a verify flag.'));
+    const model = DATA.model;
+    const backtest = DATA.backtest;
+
+    const sortedRows = DATA.rows.slice().sort(function (a, b) { return a.tvl_usd - b.tvl_usd || a.slug.localeCompare(b.slug); });
+    const firstCut = Math.floor(sortedRows.length / 3);
+    const secondCut = Math.floor(2 * sortedRows.length / 3);
+    const groups = [sortedRows.slice(0, firstCut), sortedRows.slice(firstCut, secondCut), sortedRows.slice(secondCut)];
+    const bandRatios = groups.map(function (group) {
+      return median(group.map(function (row) { return row.implied_high_usd / row.implied_value_usd; })).toFixed(1);
+    });
+
+    const formula = make('div', 'mono');
+    formula.style.whiteSpace = 'pre-wrap';
+    const formulaLines = [
+      'ln(implied value) = ' + model.intercept + ' + ' + model.slope + '·ln(TVL) + category + ' + model.growth_slope + '·growth7d + ' + model.age_slope + '·age_years',
+      'Implied value = exp(the fitted log value) × sibling discount',
+      'P10–P90 band = value ÷/× exp(1.28·residual_sd) per TVL tercile',
+      'low TVL ×' + bandRatios[0] + ', mid TVL ×' + bandRatios[1] + ', high TVL ×' + bandRatios[2],
+      'Fitted from ' + model.comps_count + ' token launches; R² = ' + model.r_squared + '; residual sd = ' + model.residual_sd,
+      'Model version: ' + model.model_version,
+      'Category factors:',
+    ];
+    const factorEntries = Object.entries(model.category_factors).sort(function (a, b) { return a[0].localeCompare(b[0]); });
+    for (const entry of factorEntries) formulaLines.push(entry[0] + ': ' + (entry[1] >= 0 ? '+' : '') + entry[1].toFixed(3));
+    formula.textContent = formulaLines.join('\n');
+    section.appendChild(formula);
+    section.appendChild(make('p', 'muted', 'Only categories with 5+ launches get a factor — the zeros are the honest picture.'));
+
+    function table(headers, rows) {
+      const wrap = make('div', 'table-wrap');
+      const element = make('table', 'board');
+      const thead = make('thead', '');
+      const headRow = make('tr', '');
+      for (const label of headers) headRow.appendChild(make('th', '', label));
+      thead.appendChild(headRow);
+      element.appendChild(thead);
+      const tbody = make('tbody', '');
+      for (const row of rows) {
+        const tr = make('tr', '');
+        for (const cell of row) tr.appendChild(make('td', '', cell));
+        tbody.appendChild(tr);
+      }
+      element.appendChild(tbody);
+      wrap.appendChild(element);
+      return wrap;
+    }
+    const pct = function (value) { return (value * 100).toFixed(1) + '%'; };
+    section.appendChild(make('h3', '', 'Backtest'));
+    section.appendChild(table(['Model', 'Miss', 'Within 3×', 'Within 10×', 'n'], [
+      ['LOO (blind)', '×' + backtest.loo_miss.toFixed(2), pct(backtest.loo_within3), pct(backtest.loo_within10), backtest.loo_n],
+      ['Time-split', '×' + backtest.time_miss.toFixed(2), pct(backtest.time_within3), '—', backtest.time_n],
+      ['Flat baseline (LOO)', '×' + backtest.flat_loo_miss.toFixed(2), pct(backtest.flat_loo_within3), '—', backtest.loo_n],
+      ['Flat baseline (time-split)', '×' + backtest.flat_time_miss.toFixed(2), pct(backtest.flat_time_within3), '—', backtest.time_n],
+    ]));
+    section.appendChild(make('p', 'muted', 'Backtest refits every parameter per fold / on pre-2025 data only; the fit drops ' + (backtest.loo_n - model.comps_count) + ' comp >3σ, the backtest uses all ' + backtest.loo_n + '.'));
+
+    section.appendChild(make('h3', '', 'Yardstick'));
+    const yardstickRows = DATA.yardstick.filter(function (item) { return item.comps >= 5; }).map(function (item) {
+      const factor = item.factor;
+      return [item.category, item.comps, '×' + item.median_multiple.toFixed(2), (factor >= 0 ? '+' : '') + factor.toFixed(3)];
+    });
+    section.appendChild(table(['Category', 'Launches', 'Median multiple', 'Factor'], yardstickRows));
+    section.appendChild(make('p', 'muted', 'Factor is the median residual after the TVL curve, not the raw multiple — a category can have a low multiple and a positive factor.'));
+
+    section.appendChild(make('h3', '', 'FARM / THIN / SKIP counts at 5% / 10% / 20% slice shares'));
+    const sensitivityRows = [0.05, 0.10, 0.20].map(function (share) {
+      const counts = { FARM: 0, THIN: 0, SKIP: 0 };
+      for (const row of DATA.rows) {
+        const slice = row.slice_usd * (share / 0.10);
+        const costs = row.gas_usd + row.fees_usd + row.forgone_usd;
+        const net = slice - costs;
+        const nph = net / row.work_hours;
+        const verdict = nph >= 2 && slice >= 2 * costs ? 'FARM' : net > 0 ? 'THIN' : 'SKIP';
+        counts[verdict] += 1;
+      }
+      return [Math.round(share * 100) + '%', counts.FARM, counts.THIN, counts.SKIP];
+    });
+    section.appendChild(table(['Slice share', 'FARM', 'THIN', 'SKIP'], sensitivityRows));
+
+    section.appendChild(make('h3', '', 'TVL and implied value'));
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('viewBox', '0 0 760 440');
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', 'Log TVL versus value scatter plot');
+    svg.setAttribute('class', 'scatter');
+    const width = 760, height = 440, left = 78, right = 22, top = 18, bottom = 58;
+    const plotW = width - left - right, plotH = height - top - bottom;
+    const livePoints = DATA.live.filter(function (row) { return row.mcap_usd > 0 && row.tvl_usd > 0; });
+    const valuesX = DATA.rows.map(function (row) { return row.tvl_usd; }).concat(livePoints.map(function (row) { return row.tvl_usd; })).filter(function (n) { return n > 0; });
+    const valuesY = DATA.rows.map(function (row) { return row.implied_value_usd; }).concat(livePoints.map(function (row) { return row.mcap_usd; })).filter(function (n) { return n > 0; });
+    const log10 = function (n) { return Math.log(n) / Math.LN10; };
+    const xMin = Math.min.apply(null, valuesX), xMax = Math.max.apply(null, valuesX);
+    const yMin = Math.min.apply(null, valuesY), yMax = Math.max.apply(null, valuesY);
+    const xLo = log10(xMin), xHi = log10(xMax), yLo = log10(yMin), yHi = log10(yMax);
+    const xCoord = function (n) { return left + (log10(n) - xLo) / (xHi - xLo || 1) * plotW; };
+    const yCoord = function (n) { return top + plotH - (log10(n) - yLo) / (yHi - yLo || 1) * plotH; };
+    function svgEl(tag, attrs, label) {
+      const node = document.createElementNS(svgNS, tag);
+      for (const key of Object.keys(attrs || {})) node.setAttribute(key, attrs[key]);
+      if (label !== undefined) node.textContent = label;
+      return node;
+    }
+    const xTicks = [1e7, 1e8, 1e9, 1e10];
+    const yTicks = [1e6, 1e7, 1e8, 1e9];
+    for (const tick of xTicks) if (tick >= xMin && tick <= xMax) {
+      const x = xCoord(tick);
+      svg.appendChild(svgEl('line', { x1: x, y1: top, x2: x, y2: top + plotH, stroke: '#2b3541' }));
+      svg.appendChild(svgEl('text', { x: x, y: top + plotH + 20, fill: '#9ca3af', 'text-anchor': 'middle', 'font-size': 11 }, fmtUsd(tick)));
+    }
+    for (const tick of yTicks) if (tick >= yMin && tick <= yMax) {
+      const y = yCoord(tick);
+      svg.appendChild(svgEl('line', { x1: left, y1: y, x2: left + plotW, y2: y, stroke: '#2b3541' }));
+      svg.appendChild(svgEl('text', { x: left - 8, y: y + 4, fill: '#9ca3af', 'text-anchor': 'end', 'font-size': 11 }, fmtUsd(tick)));
+    }
+    const fitY1 = Math.exp(model.intercept + model.slope * Math.log(xMin));
+    const fitY2 = Math.exp(model.intercept + model.slope * Math.log(xMax));
+    svg.appendChild(svgEl('line', { x1: xCoord(xMin), y1: yCoord(Math.max(yMin, Math.min(yMax, fitY1))), x2: xCoord(xMax), y2: yCoord(Math.max(yMin, Math.min(yMax, fitY2))), stroke: '#f59e0b', 'stroke-width': 2, 'stroke-dasharray': '6 5' }));
+    for (const row of DATA.rows.slice(0, 200)) svg.appendChild(svgEl('circle', { cx: xCoord(Math.max(xMin, Math.min(xMax, row.tvl_usd))), cy: yCoord(Math.max(yMin, Math.min(yMax, row.implied_value_usd))), r: 3, fill: '#fbbf24', opacity: 0.75 }));
+    for (const row of livePoints.slice(0, 24)) svg.appendChild(svgEl('circle', { cx: xCoord(row.tvl_usd), cy: yCoord(row.mcap_usd), r: 3, fill: '#22d3ee', opacity: 0.85 }));
+    svg.appendChild(svgEl('text', { x: left + plotW / 2, y: height - 12, fill: '#e7e5e4', 'text-anchor': 'middle', 'font-size': 12 }, 'TVL (log scale)'));
+    svg.appendChild(svgEl('text', { x: 18, y: top + plotH / 2, fill: '#e7e5e4', 'text-anchor': 'middle', 'font-size': 12, transform: 'rotate(-90 18 ' + (top + plotH / 2) + ')' }, 'Value (log scale)'));
+    section.appendChild(svg);
+    section.appendChild(make('p', 'muted', 'Amber: pre-token implied value. Cyan: live market cap.'));
+    return section;
+  }
+
+  function clamp(value, lo, hi) { return Math.max(lo, Math.min(hi, value)); }
+
+  function openDetail(slug) {
+    const row = DATA.rows.find(function (item) { return item.slug === slug; });
+    if (!row) return;
+    const existing = document.querySelector('dialog.detail');
+    if (existing) {
+      if (existing.open) existing.close();
+      existing.remove();
+    }
+    state.selected = slug;
+    writeState();
+    const dialog = make('dialog', 'detail');
+    const title = make('h2', '', row.name + ' · #' + row.rank);
+    dialog.appendChild(title);
+    dialog.appendChild(make('p', 'muted', (row.category || '—') + ' · ' + (row.chains || []).join(', ')));
+    dialog.appendChild(make('p', '', 'TVL: ' + fmtUsd(row.tvl_usd) + ' · 7d: ' + fmtPct(row.change_7d) + ' · Age: ' + fmtAge(row.age_days)));
+    dialog.appendChild(make('p', 'warn', 'Implied value: ' + fmtUsd(row.implied_value_usd)));
+    dialog.appendChild(make('p', '', 'P10–P90: ' + fmtUsd(row.implied_low_usd) + '–' + fmtUsd(row.implied_high_usd)));
+    const chain = (row.chains || [])[0] || 'Unknown';
+    dialog.appendChild(make('p', '', row.verdict + ' · $1K slice: ' + fmtUsd2(row.slice_usd) + ' · Net $/hr: ' + fmtUsd2(row.net_per_hour_usd) + ' · Gas (' + chain + '): ' + fmtUsd2(row.gas_usd)));
+    if (row.flag === 'verify') dialog.appendChild(make('p', 'warn', 'DefiLlama records no token for this protocol — verify independently before acting on it.'));
+
+    const model = DATA.model;
+    const base = Math.exp(model.intercept + model.slope * Math.log(Math.max(row.tvl_usd, 1)));
+    const category = Math.exp(model.category_factors[row.category] || 0);
+    const growth = Math.exp(model.growth_slope * clamp(row.change_7d === null ? 0 : row.change_7d, -30, 60));
+    const age = Math.exp(model.age_slope * (row.age_days || 0) / 365.25);
+    const sibling = row.implied_value_usd / (base * category * growth * age);
+    dialog.appendChild(make('h3', '', 'Model decomposition'));
+    const dl = make('dl', 'decomposition');
+    const decomposition = [
+      ['Base exp(intercept + slope × ln TVL)', fmtUsd(base)],
+      ['Category', '×' + category.toFixed(3)],
+      ['Growth', '×' + growth.toFixed(3)],
+      ['Age', '×' + age.toFixed(3)],
+      ['Sibling', '×' + sibling.toFixed(3)],
+    ];
+    for (const pair of decomposition) {
+      dl.appendChild(make('dt', '', pair[0]));
+      dl.appendChild(make('dd', '', pair[1]));
+    }
+    dialog.appendChild(dl);
+    dialog.appendChild(make('p', 'muted', 'Base × category × growth × age × sibling = ' + fmtUsd(row.implied_value_usd)));
+    dialog.appendChild(make('h3', '', 'Farm plan — $1,000, costed'));
+    const steps = make('ol', 'farm-steps');
+    for (const step of row.farm_steps || []) steps.appendChild(make('li', '', step));
+    dialog.appendChild(steps);
+    const close = make('button', '', 'Close');
+    close.type = 'button';
+    close.addEventListener('click', function () { dialog.close(); });
+    dialog.appendChild(close);
+    dialog.addEventListener('close', function () {
+      if (state.selected === slug) { state.selected = ''; writeState(); }
+    });
+    document.body.appendChild(dialog);
+    dialog.showModal();
+    close.blur();
+    dialog.scrollTop = 0;
+  }
+
+  function render() {
+    const root = document.getElementById('board');
+    if (!root) return;
+    const oldDialog = document.querySelector('dialog.detail');
+    if (oldDialog) {
+      if (oldDialog.open) oldDialog.close();
+      oldDialog.remove();
+    }
+    const children = [header(), hero(), controls()];
+    let panel;
+    if (state.tab === 'live') panel = liveTable();
+    else if (state.tab === 'aside') panel = asidePanel();
+    else if (state.tab === 'method') panel = methodPanel();
+    else {
+      panel = boardTable(filteredRows());
+      for (const tr of panel.querySelectorAll('tbody tr[data-slug]')) {
+        const row = DATA.rows.find(function (item) { return item.slug === tr.dataset.slug; });
+        if (row && tr.lastElementChild) tr.lastElementChild.replaceChildren(makeBadge(row.verdict));
+      }
+    }
+    children.push(panel);
+    if (state.tab !== 'live' && state.tab !== 'aside' && state.tab !== 'method') {
+      children.push(bestFarms(), researchNote());
+    }
+    root.replaceChildren.apply(root, children);
+    root.setAttribute('aria-busy', 'false');
+    for (const button of root.querySelectorAll('[data-detail-slug]')) {
+      button.addEventListener('click', function () { openDetail(button.dataset.detailSlug); });
+    }
+    if (state.selected) openDetail(state.selected);
+  }
+
+  if (!window.RADAR) {
+    const root = document.getElementById('board');
+    if (root) root.textContent = 'Dashboard data failed to load.';
+    return;
+  }
+  window.addEventListener('hashchange', function () { state = readState(); render(); });
+  render();
+})();
